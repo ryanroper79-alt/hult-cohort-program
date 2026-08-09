@@ -23,14 +23,6 @@ Launch URL: **https://ryanroper79-alt.vercel.app/launch**
 
 Program directory (cohort): `https://site-nine-rouge-68.vercel.app/program/phase-2-learning-app`
 
-## Promotion channels used
-
-**TBD** — @ryanroper79-alt to fill before merge (Slack cohort channel, LinkedIn, etc.)
-
-## Metrics API snapshot date
-
-**TBD** — pick a date after production deploy and events are landing
-
 ## Integration evidence (launch flow + events firing)
 
 ### Launch flow
@@ -58,17 +50,19 @@ Program directory (cohort): `https://site-nine-rouge-68.vercel.app/program/phase
 }
 ```
 
-**Evidence template** (fill with live timestamps from smoke test or production):
+**Verified locally** (`npm run smoke-test` against Ludwitt API `http://localhost:4000/v1`, app on `:3001`):
 
 ```
-Session: <session_id>
-User: <external-user-id>
-Timestamp: <ISO-8601>
-Event: qualification.scored
-Ludwitt API response: 201 Created
+Session: 486f2122-eac7-4c74-93ac-46ab608e6578
+User: external-smoke-user-1
+Timestamp: 2026-08-09T00:40:38.971Z
+Event: qualification.scored → Ludwitt platform event quiz_submitted
+Opportunity: fc21601b-4880-487d-a72e-87b08d0c6393 (stage=rfp)
+Result: recommendation=bid, total_score=74.5
+Metrics API (same app_id): unique_users=1, qualified_users=1
 ```
 
-Local smoke test: `npm run smoke-test` (requires local Ludwitt API + `.env.local`)
+Code path: `GET /launch?token=…` → session cookie `bidmanager_session` → `POST /api/opportunities/{id}/qualify` → `emitPlatformEvent('qualification.scored', …)` in `src/lib/ludwitt/events.ts` → `POST /v1/apps/{app_id}/events` with `event: quiz_submitted`.
 
 Secondary events: `bid.decided`, `opportunity.screened` (Finder poll), `opportunity.discovered`
 
